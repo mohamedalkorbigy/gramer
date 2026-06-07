@@ -1,0 +1,428 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap');
+  :root { --ar: 'Noto Naskh Arabic', 'Amiri', serif; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  #app { font-family: var(--ar); direction: rtl; padding: 1.5rem 1rem; max-width: 700px; margin: 0 auto; }
+  h2.sr-only { position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* HOME */
+  .home-header { text-align: center; padding: 1rem 0 1.5rem; }
+  .home-title { font-size: 28px; font-weight: 700; color: var(--color-text-primary); margin-bottom: .4rem; }
+  .home-sub { font-size: 15px; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
+  .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+  .cat-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.2rem 1rem; cursor: pointer; text-align: center; transition: border-color .2s, transform .15s; }
+  .cat-card:hover { border-color: var(--color-border-primary); transform: translateY(-2px); }
+  .cat-card.selected { border: 2px solid; }
+  .cat-icon { font-size: 32px; margin-bottom: 8px; }
+  .cat-name { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+  .cat-desc { font-size: 12px; color: var(--color-text-secondary); }
+  .btn-primary { display: block; width: 100%; padding: .8rem; font-family: var(--ar); font-size: 17px; font-weight: 700; border-radius: var(--border-radius-md); border: none; cursor: pointer; color: #fff; background: #533AB7; transition: opacity .2s; }
+  .btn-primary:hover { opacity: .88; }
+  .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* LEARN SCREEN */
+  .section-tabs { display: flex; gap: 8px; margin-bottom: 1.2rem; flex-wrap: wrap; }
+  .tab { padding: .45rem 1rem; border: 0.5px solid var(--color-border-tertiary); border-radius: 99px; font-family: var(--ar); font-size: 14px; cursor: pointer; background: transparent; color: var(--color-text-secondary); transition: .15s; }
+  .tab.active { background: #533AB7; color: #fff; border-color: #533AB7; }
+  .learn-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.2rem 1.4rem; margin-bottom: 1rem; }
+  .learn-card-title { font-size: 20px; font-weight: 700; margin-bottom: .5rem; }
+  .learn-card-def { font-size: 15px; color: var(--color-text-secondary); line-height: 1.8; margin-bottom: .8rem; }
+  .signs-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: .8rem; }
+  .sign-pill { padding: .3rem .8rem; border-radius: 99px; font-size: 14px; font-weight: 600; border: 0.5px solid; }
+  .examples-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .example-chip { padding: .4rem .9rem; border-radius: var(--border-radius-md); font-size: 16px; font-weight: 700; border: 0.5px solid; }
+  .visual-box { border-radius: var(--border-radius-md); padding: 1rem; margin-top: .8rem; text-align: center; }
+  .visual-box .big-word { font-size: 36px; font-weight: 700; }
+  .visual-box .label { font-size: 13px; margin-top: 4px; }
+
+  /* QUIZ SCREEN */
+  .quiz-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
+  .quiz-progress { font-size: 14px; color: var(--color-text-secondary); }
+  .score-badge { font-size: 14px; font-weight: 600; padding: .3rem .8rem; border-radius: 99px; background: var(--color-background-success); color: var(--color-text-success); border: 0.5px solid var(--color-border-success); }
+  .progress-bar { height: 6px; background: var(--color-background-secondary); border-radius: 99px; margin-bottom: 1.2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: #533AB7; border-radius: 99px; transition: width .4s; }
+  .question-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.4rem; margin-bottom: 1rem; }
+  .question-type { font-size: 12px; color: var(--color-text-secondary); margin-bottom: .6rem; }
+  .question-text { font-size: 22px; font-weight: 700; color: var(--color-text-primary); line-height: 1.7; margin-bottom: .2rem; }
+  .question-hint { font-size: 13px; color: var(--color-text-secondary); }
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+  .option-btn { padding: .9rem .8rem; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); font-family: var(--ar); font-size: 17px; font-weight: 700; cursor: pointer; background: var(--color-background-primary); color: var(--color-text-primary); transition: .15s; text-align: center; }
+  .option-btn:hover:not(:disabled) { border-color: #533AB7; color: #533AB7; }
+  .option-btn.correct { background: #EAF3DE; border-color: #3B6D11; color: #27500A; }
+  .option-btn.wrong { background: #FCEBEB; border-color: #A32D2D; color: #791F1F; }
+  .option-btn.reveal { background: #EAF3DE; border-color: #3B6D11; color: #27500A; opacity: .6; }
+  .feedback-box { border-radius: var(--border-radius-md); padding: 1rem 1.2rem; margin-bottom: 1rem; font-size: 15px; line-height: 1.7; }
+  .feedback-box.correct { background: #EAF3DE; border: 0.5px solid #3B6D11; color: #27500A; }
+  .feedback-box.wrong { background: #FCEBEB; border: 0.5px solid #A32D2D; color: #791F1F; }
+  .btn-next { padding: .7rem 2rem; font-family: var(--ar); font-size: 16px; font-weight: 700; border-radius: var(--border-radius-md); border: none; cursor: pointer; background: #533AB7; color: #fff; float: left; }
+  .btn-next:hover { opacity: .88; }
+
+  /* RESULT SCREEN */
+  .result-center { text-align: center; padding: 2rem 0; }
+  .result-emoji { font-size: 56px; margin-bottom: 1rem; }
+  .result-title { font-size: 26px; font-weight: 700; margin-bottom: .5rem; }
+  .result-score { font-size: 48px; font-weight: 700; color: #533AB7; margin: .5rem 0; }
+  .result-msg { font-size: 15px; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
+  .result-breakdown { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 1.5rem; }
+  .rb-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: .8rem; text-align: center; }
+  .rb-num { font-size: 24px; font-weight: 700; }
+  .rb-lbl { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+  .btn-row { display: flex; gap: 10px; justify-content: center; }
+  .btn-outline { padding: .7rem 1.5rem; font-family: var(--ar); font-size: 15px; font-weight: 700; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); cursor: pointer; background: transparent; color: var(--color-text-primary); }
+  .btn-outline:hover { background: var(--color-background-secondary); }
+</style>
+
+<div id="app">
+  <h2 class="sr-only">لعبة تعليمية تفاعلية في أنواع الكلمة العربية: الاسم والفعل والحرف وعلاماتها</h2>
+
+  <!-- HOME SCREEN -->
+  <div id="screen-home" class="screen active">
+    <div class="home-header">
+      <div class="home-title">🏆 أَنْوَاعُ الْكَلِمَةِ</div>
+      <div class="home-sub">تَعَلَّمْ وَامْتَحِنْ نَفْسَكَ فِي النَّحْوِ الْعَرَبِيِّ</div>
+    </div>
+    <div class="category-grid" id="cat-grid"></div>
+    <button class="btn-primary" id="btn-start" disabled onclick="startLearn()">اِبْدَأِ التَّعَلُّمَ ←</button>
+  </div>
+
+  <!-- LEARN SCREEN -->
+  <div id="screen-learn" class="screen">
+    <div class="section-tabs" id="learn-tabs"></div>
+    <div id="learn-content"></div>
+    <button class="btn-primary" onclick="startQuiz()" style="margin-top:.5rem">اِبْدَأِ الاِمْتِحَانَ ←</button>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="screen-quiz" class="screen">
+    <div class="quiz-header">
+      <span class="quiz-progress" id="q-progress">سُؤَالٌ ١ مِنْ ١٠</span>
+      <span class="score-badge" id="q-score">النَّتِيجَةُ: ٠</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="q-bar" style="width:0%"></div></div>
+    <div class="question-card" id="q-card"></div>
+    <div class="options-grid" id="q-options"></div>
+    <div id="q-feedback" style="display:none"></div>
+    <div style="overflow:hidden;margin-top:.5rem">
+      <button class="btn-next" id="btn-next" style="display:none" onclick="nextQuestion()">التَّالِي ←</button>
+    </div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="screen-result" class="screen">
+    <div class="result-center">
+      <div class="result-emoji" id="res-emoji">🎉</div>
+      <div class="result-title" id="res-title">أَحْسَنْتَ!</div>
+      <div class="result-score" id="res-score">٠/١٠</div>
+      <div class="result-msg" id="res-msg"></div>
+      <div class="result-breakdown">
+        <div class="rb-card"><div class="rb-num" id="rb-correct" style="color:#3B6D11">٠</div><div class="rb-lbl">صَوَابٌ</div></div>
+        <div class="rb-card"><div class="rb-num" id="rb-wrong" style="color:#A32D2D">٠</div><div class="rb-lbl">خَطَأٌ</div></div>
+        <div class="rb-card"><div class="rb-num" id="rb-pct" style="color:#533AB7">٠٪</div><div class="rb-lbl">نِسْبَةُ النَّجَاحِ</div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-outline" onclick="showScreen('screen-home')">الرَّئِيسِيَّةُ</button>
+        <button class="btn-primary" style="width:auto;padding:.7rem 1.5rem" onclick="startQuiz()">أَعِدِ الاِمْتِحَانَ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  noun: {
+    name: "الاِسْمُ",
+    color: "#533AB7",
+    bg: "#EEEDFE",
+    borderColor: "#7F77DD",
+    icon: "📘",
+    def: "الاِسْمُ هُوَ كُلُّ لَفْظٍ يَدُلُّ عَلَى مَعْنًى فِي نَفْسِهِ وَلَا يَرْتَبِطُ بِزَمَانٍ، وَيُسَمَّى بِهِ إِنْسَانٌ أَوْ حَيَوَانٌ أَوْ نَبَاتٌ أَوْ جَمَادٌ أَوْ مَعْنًى.",
+    signs: [
+      { text: "قَبُولُ التَّنْوِينِ", color: "#EEEDFE", border: "#7F77DD", textColor: "#3C3489" },
+      { text: "دُخُولُ (أَلْ)", color: "#EEEDFE", border: "#7F77DD", textColor: "#3C3489" },
+      { text: "الْجَرُّ بِالْكَسْرَةِ", color: "#EEEDFE", border: "#7F77DD", textColor: "#3C3489" },
+      { text: "الإِسْنَادُ إِلَيْهِ", color: "#EEEDFE", border: "#7F77DD", textColor: "#3C3489" },
+      { text: "دُخُولُ حُرُوفِ الْجَرِّ", color: "#EEEDFE", border: "#7F77DD", textColor: "#3C3489" },
+    ],
+    examples: ["مُحَمَّدٌ", "الْكِتَابُ", "شَجَرَةٌ", "الْمَدِينَةُ", "عِلْمٌ"],
+    visual: { word: "كِتَابٌ", note: "دَخَلَتْ عَلَيْهِ (أَلْ) → الْكِتَابُ، وَقَبِلَ التَّنْوِينَ ✓" }
+  },
+  verb: {
+    name: "الْفِعْلُ",
+    color: "#0F6E56",
+    bg: "#E1F5EE",
+    borderColor: "#1D9E75",
+    icon: "📗",
+    def: "الْفِعْلُ هُوَ كُلُّ لَفْظٍ يَدُلُّ عَلَى حَدَثٍ مُرْتَبِطٍ بِزَمَانٍ، وَيَنْقَسِمُ إِلَى مَاضٍ وَمُضَارِعٍ وَأَمْرٍ.",
+    signs: [
+      { text: "قَبُولُ (تَاءِ) التَّأْنِيثِ السَّاكِنَةِ", color: "#E1F5EE", border: "#1D9E75", textColor: "#085041" },
+      { text: "قَبُولُ (قَدْ)", color: "#E1F5EE", border: "#1D9E75", textColor: "#085041" },
+      { text: "قَبُولُ (السِّينِ) وَ(سَوْفَ)", color: "#E1F5EE", border: "#1D9E75", textColor: "#085041" },
+      { text: "قَبُولُ (لَمْ) وَالْجَزْمِ", color: "#E1F5EE", border: "#1D9E75", textColor: "#085041" },
+      { text: "قَبُولُ (يَاءِ) الْمُخَاطَبَةِ", color: "#E1F5EE", border: "#1D9E75", textColor: "#085041" },
+    ],
+    types: [
+      { name: "الْمَاضِي", ex: "كَتَبَ، ذَهَبَ، قَرَأَ", note: "زَمَنٌ مَضَى وَانْقَضَى" },
+      { name: "الْمُضَارِعُ", ex: "يَكْتُبُ، يَذْهَبُ، يَقْرَأُ", note: "زَمَنٌ حَاضِرٌ أَوْ مُسْتَقْبَلٌ" },
+      { name: "الْأَمْرُ", ex: "اُكْتُبْ، اِذْهَبْ، اِقْرَأْ", note: "طَلَبُ الْقِيَامِ بِالْفِعْلِ" },
+    ],
+    examples: ["كَتَبَ", "يَقْرَأُ", "اُكْتُبْ", "ذَهَبَتْ", "سَيَنْجَحُ"],
+    visual: { word: "كَتَبَتْ", note: "قَبِلَتِ التَّاءَ السَّاكِنَةَ ✓ → فِعْلٌ مَاضٍ" }
+  },
+  letter: {
+    name: "الْحَرْفُ",
+    color: "#993C1D",
+    bg: "#FAECE7",
+    borderColor: "#D85A30",
+    icon: "📙",
+    def: "الْحَرْفُ هُوَ مَا لَا يَظْهَرُ مَعْنَاهُ إِلَّا مَعَ غَيْرِهِ، وَهُوَ مَبْنِيٌّ دَائِمًا وَلَا يَقْبَلُ عَلَامَاتِ الِاسْمِ وَلَا عَلَامَاتِ الْفِعْلِ.",
+    signs: [
+      { text: "لَا يَقْبَلُ عَلَامَاتِ الِاسْمِ", color: "#FAECE7", border: "#D85A30", textColor: "#4A1B0C" },
+      { text: "لَا يَقْبَلُ عَلَامَاتِ الْفِعْلِ", color: "#FAECE7", border: "#D85A30", textColor: "#4A1B0C" },
+      { text: "يُفِيدُ مَعْنًى فِي غَيْرِهِ", color: "#FAECE7", border: "#D85A30", textColor: "#4A1B0C" },
+    ],
+    types: [
+      { name: "حُرُوفُ الْجَرِّ", ex: "مِنْ، إِلَى، عَنْ، عَلَى، فِي، بِ، لِ" },
+      { name: "حُرُوفُ الْعَطْفِ", ex: "وَ، فَ، ثُمَّ، أَوْ، بَلْ، لَكِنْ" },
+      { name: "حُرُوفُ النَّفْيِ", ex: "لَا، لَمْ، لَنْ، مَا، لَيْسَ" },
+      { name: "حُرُوفُ النِّدَاءِ", ex: "يَا، أَيَا، هَيَا، أَيْ" },
+    ],
+    examples: ["فِي", "وَ", "لَا", "إِلَى", "هَلْ"],
+    visual: { word: "فِي الْبَيْتِ", note: "الْحَرْفُ (فِي) لَا مَعْنَى لَهُ وَحْدَهُ، مَعْنَاهُ مَعَ مَا بَعْدَهُ" }
+  }
+};
+
+const QUESTIONS = [
+  { q: "مَا نَوْعُ كَلِمَةِ «مُحَمَّدٌ»؟", ans: "noun", opts: ["noun","verb","letter"], hint: "تَدُلُّ عَلَى إِنْسَانٍ" },
+  { q: "مَا نَوْعُ كَلِمَةِ «ذَهَبَ»؟", ans: "verb", opts: ["noun","verb","letter"], hint: "تَدُلُّ عَلَى حَدَثٍ مَاضٍ" },
+  { q: "مَا نَوْعُ كَلِمَةِ «فِي»؟", ans: "letter", opts: ["noun","verb","letter"], hint: "حَرْفُ جَرٍّ" },
+  { q: "كَلِمَةُ «الشَّمْسُ» تَقْبَلُ (أَلْ)، فَهِيَ:", ans: "noun", opts: ["noun","verb","letter"], hint: "قَبُولُ (أَلْ) عَلَامَةُ الاِسْمِ" },
+  { q: "مَا نَوْعُ «يَكْتُبُ»؟", ans: "verb", opts: ["noun","verb","letter"], hint: "يَدُلُّ عَلَى زَمَنٍ حَاضِرٍ" },
+  { q: "أَيُّ الْكَلِمَاتِ التَّالِيَةِ حَرْفٌ؟", ans: "letter", opts: ["noun","verb","letter"], hint: "لَا يُفِيدُ وَحْدَهُ", word: "وَ" },
+  { q: "كَلِمَةُ «عِلْمٌ» قَبِلَتِ التَّنْوِينَ، إِذًا هِيَ:", ans: "noun", opts: ["noun","verb","letter"], hint: "التَّنْوِينُ عَلَامَةُ الاِسْمِ" },
+  { q: "مَا نَوْعُ «اِقْرَأْ»؟", ans: "verb", opts: ["noun","verb","letter"], hint: "طَلَبُ الْقِيَامِ بِالْفِعْلِ" },
+  { q: "الْكَلِمَةُ الَّتِي لَا يَظْهَرُ مَعْنَاهَا إِلَّا مَعَ غَيْرِهَا هِيَ:", ans: "letter", opts: ["noun","verb","letter"], hint: "تَعْرِيفُ أَحَدِ أَنْوَاعِ الْكَلِمَةِ" },
+  { q: "كَلِمَةُ «سَيَنْجَحُ» يَدْخُلُ عَلَيْهَا (السِّينُ)، فَهِيَ:", ans: "verb", opts: ["noun","verb","letter"], hint: "السِّينُ عَلَامَةُ الْمُضَارِعِ" },
+  { q: "أَيُّهَا اسْمٌ؟", ans: "noun", opts: ["noun","verb","letter"], hint: "يَدُلُّ عَلَى شَجَرَةٍ", word: "شَجَرَةٌ" },
+  { q: "مَا نَوْعُ «لَمْ يَنَمْ»؟ (لَمْ)", ans: "letter", opts: ["noun","verb","letter"], hint: "حَرْفُ نَفْيٍ وَجَزْمٍ" },
+  { q: "كَلِمَةُ «يَا» حَرْفُ نِدَاءٍ، فَهِيَ:", ans: "letter", opts: ["noun","verb","letter"], hint: "لَا تَقْبَلُ عَلَامَاتِ الاِسْمِ وَلَا الْفِعْلِ" },
+  { q: "مَا نَوْعُ «قَرَأَتْ»؟", ans: "verb", opts: ["noun","verb","letter"], hint: "قَبِلَتِ التَّاءَ السَّاكِنَةَ" },
+  { q: "الْكِتَابُ اسْمٌ لأَنَّهُ:", ans: "noun", opts: ["noun","verb","letter"], hint: "اخْتَرِ السَّبَبَ الصَّحِيحَ", special: "signs" }
+];
+
+const SIGNS_Q = {
+  q: "الْكِتَابُ اسْمٌ لأَنَّهُ:",
+  ans: "noun",
+  choices: [
+    { text: "قَبِلَ (أَلْ) التَّعْرِيفِ", correct: true },
+    { text: "قَبِلَ تَاءَ التَّأْنِيثِ السَّاكِنَةَ", correct: false },
+    { text: "قَبِلَ التَّنْوِينَ", correct: true },
+    { text: "دَخَلَتْ عَلَيْهِ السِّينُ", correct: false },
+  ]
+};
+
+function toArabicNum(n) {
+  return n.toString().replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+}
+
+let selectedCats = new Set(['noun','verb','letter']);
+let learnTab = 'noun';
+let quizQs = [], qIdx = 0, score = 0, answered = false;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function renderHome() {
+  const grid = document.getElementById('cat-grid');
+  grid.innerHTML = Object.entries(DATA).map(([k,v]) => `
+    <div class="cat-card${selectedCats.has(k)?' selected':''}" id="cat-${k}" onclick="toggleCat('${k}')" style="${selectedCats.has(k)?'border-color:'+v.color+';border-width:2px':''}">
+      <div class="cat-icon">${v.icon}</div>
+      <div class="cat-name" style="color:${v.color}">${v.name}</div>
+      <div class="cat-desc">اِضْغَطْ لِلتَّعَلُّمِ وَالاِمْتِحَانِ</div>
+    </div>
+  `).join('');
+}
+
+function toggleCat(k) {
+  if (selectedCats.has(k) && selectedCats.size === 1) return;
+  if (selectedCats.has(k)) selectedCats.delete(k); else selectedCats.add(k);
+  renderHome();
+  document.getElementById('btn-start').disabled = selectedCats.size === 0;
+}
+
+function startLearn() {
+  learnTab = [...selectedCats][0];
+  renderLearn();
+  showScreen('screen-learn');
+}
+
+function renderLearn() {
+  const tabs = document.getElementById('learn-tabs');
+  tabs.innerHTML = [...selectedCats].map(k => `
+    <button class="tab${learnTab===k?' active':''}" onclick="setLearnTab('${k}')">${DATA[k].icon} ${DATA[k].name}</button>
+  `).join('');
+  const d = DATA[learnTab];
+  const lc = document.getElementById('learn-content');
+  let html = `
+    <div class="learn-card" style="border-top: 4px solid ${d.color}">
+      <div class="learn-card-title" style="color:${d.color}">${d.icon} تَعْرِيفُ ${d.name}</div>
+      <div class="learn-card-def">${d.def}</div>
+      <div class="visual-box" style="background:${d.bg};border:0.5px solid ${d.borderColor}">
+        <div class="big-word" style="color:${d.color}">${d.visual.word}</div>
+        <div class="label" style="color:${d.color};opacity:.8">${d.visual.note}</div>
+      </div>
+    </div>
+    <div class="learn-card">
+      <div class="learn-card-title">🔖 عَلَامَاتُ ${d.name}</div>
+      <div class="signs-list">${d.signs.map(s=>`<span class="sign-pill" style="background:${s.color};border-color:${s.border};color:${s.textColor}">${s.text}</span>`).join('')}</div>
+    </div>
+  `;
+  if (d.types) {
+    html += `<div class="learn-card"><div class="learn-card-title">📋 أَقْسَامُ ${d.name}</div>`;
+    d.types.forEach(t => {
+      html += `<div style="padding:.6rem 0;border-bottom:0.5px solid var(--color-border-tertiary)">
+        <div style="font-weight:700;color:${d.color};font-size:15px">${t.name}</div>
+        <div style="font-size:14px;color:var(--color-text-secondary);margin-top:3px">${t.ex}</div>
+        ${t.note?`<div style="font-size:12px;color:var(--color-text-secondary);margin-top:2px">${t.note}</div>`:''}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  html += `<div class="learn-card">
+    <div class="learn-card-title">✏️ أَمْثِلَةٌ عَلَى ${d.name}</div>
+    <div class="examples-row">${d.examples.map(e=>`<span class="example-chip" style="background:${d.bg};border-color:${d.borderColor};color:${d.color}">${e}</span>`).join('')}</div>
+  </div>`;
+  lc.innerHTML = html;
+}
+
+function setLearnTab(k) {
+  learnTab = k;
+  renderLearn();
+}
+
+function startQuiz() {
+  const pool = QUESTIONS.filter(q => selectedCats.has(q.ans));
+  quizQs = shuffle(pool).slice(0, Math.min(10, pool.length));
+  qIdx = 0; score = 0; answered = false;
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function shuffle(a) { return [...a].sort(() => Math.random() - .5); }
+
+function renderQuestion() {
+  const q = quizQs[qIdx];
+  const total = quizQs.length;
+  document.getElementById('q-progress').textContent = `سُؤَالٌ ${toArabicNum(qIdx+1)} مِنْ ${toArabicNum(total)}`;
+  document.getElementById('q-score').textContent = `النَّتِيجَةُ: ${toArabicNum(score)}`;
+  document.getElementById('q-bar').style.width = ((qIdx/total)*100)+'%';
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('btn-next').style.display = 'none';
+  answered = false;
+
+  const card = document.getElementById('q-card');
+  const w = q.word ? `<div class="question-text" style="font-size:28px;color:#533AB7;margin-bottom:.4rem">${q.word}</div>` : '';
+  card.innerHTML = `
+    <div class="question-type">❓ نَوْعُ الْكَلِمَةِ</div>
+    ${w}
+    <div class="question-text">${q.q}</div>
+    <div class="question-hint" style="margin-top:.4rem">💡 ${q.hint}</div>
+  `;
+
+  const optsEl = document.getElementById('q-options');
+  if (q.special === 'signs') {
+    optsEl.style.gridTemplateColumns = '1fr';
+    optsEl.innerHTML = SIGNS_Q.choices.map((c,i) => `
+      <button class="option-btn" id="signs-opt-${i}" onclick="answerSigns(${i},${c.correct})">${c.text}</button>
+    `).join('');
+  } else {
+    optsEl.style.gridTemplateColumns = '1fr 1fr';
+    const opts = shuffle(q.opts);
+    optsEl.innerHTML = opts.map(k => `
+      <button class="option-btn" id="opt-${k}" onclick="answer('${k}','${q.ans}')">${DATA[k].icon} ${DATA[k].name}</button>
+    `).join('');
+  }
+}
+
+function answer(chosen, correct) {
+  if (answered) return;
+  answered = true;
+  const isRight = chosen === correct;
+  if (isRight) score++;
+  const q = quizQs[qIdx];
+  const d = DATA[correct];
+  
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+  const chosenBtn = document.getElementById('opt-'+chosen);
+  const correctBtn = document.getElementById('opt-'+correct);
+  
+  if (isRight) {
+    chosenBtn.classList.add('correct');
+  } else {
+    chosenBtn.classList.add('wrong');
+    if (correctBtn) correctBtn.classList.add('reveal');
+  }
+
+  showFeedback(isRight, d, isRight
+    ? `أَحْسَنْتَ! «${q.word||q.q.match(/«(.+?)»/)?.[1]||''}» ${d.name} لأَنَّهَا ${d.signs[0].text}.`
+    : `الْجَوَابُ الصَّحِيحُ هُوَ «${d.name}». ${d.signs[0].text} مِنْ عَلَامَاتِهِ.`
+  );
+}
+
+function answerSigns(idx, isCorrect) {
+  if (answered) return;
+  answered = true;
+  if (isCorrect) score++;
+  document.querySelectorAll('.option-btn').forEach((b,i) => {
+    b.disabled = true;
+    const c = SIGNS_Q.choices[i];
+    if (c.correct) b.classList.add(isCorrect && i===idx ? 'correct' : 'reveal');
+    else if (i === idx && !isCorrect) b.classList.add('wrong');
+  });
+  showFeedback(isCorrect, DATA['noun'], isCorrect
+    ? 'أَحْسَنْتَ! قَبُولُ (أَلْ) وَالتَّنْوِينُ عَلَامَتَانِ مِنْ عَلَامَاتِ الِاسْمِ.'
+    : 'عَلَامَاتُ الِاسْمِ هِيَ: قَبُولُ (أَلْ)، وَالتَّنْوِينُ، وَالْجَرُّ، وَدُخُولُ حُرُوفِ الْجَرِّ.'
+  );
+}
+
+function showFeedback(isRight, d, msg) {
+  const fb = document.getElementById('q-feedback');
+  fb.style.display = 'block';
+  fb.className = 'feedback-box ' + (isRight ? 'correct' : 'wrong');
+  fb.innerHTML = `<strong>${isRight ? '✅ صَوَابٌ!' : '❌ خَطَأٌ!'}</strong> ${msg}`;
+  document.getElementById('q-score').textContent = `النَّتِيجَةُ: ${toArabicNum(score)}`;
+  document.getElementById('btn-next').style.display = 'block';
+  document.getElementById('btn-next').textContent = qIdx < quizQs.length - 1 ? 'التَّالِي ←' : 'النَّتِيجَةُ الْنِّهَائِيَّةُ ←';
+}
+
+function nextQuestion() {
+  qIdx++;
+  if (qIdx >= quizQs.length) showResult();
+  else renderQuestion();
+}
+
+function showResult() {
+  const total = quizQs.length;
+  const pct = Math.round((score/total)*100);
+  const emojis = pct>=90?'🏆':pct>=70?'🎉':pct>=50?'😊':'💪';
+  const titles = pct>=90?'مُمْتَازٌ!':pct>=70?'أَحْسَنْتَ جِدًّا!':pct>=50?'جَيِّدٌ!':'حَاوِلْ مَرَّةً أُخْرَى!';
+  const msgs = pct>=90?'أَنْتَ نَجْمٌ فِي النَّحْوِ الْعَرَبِيِّ! 🌟':pct>=70?'أَدَاءٌ رَائِعٌ، وَاصِلِ التَّعَلُّمَ!':pct>=50?'جَيِّدٌ، يُمْكِنُكَ التَّحَسُّنُ بِالتَّدْرِيبِ.':'لَا تَيْأَسْ، رَاجِعِ الدُّرُوسَ وَحَاوِلْ!';
+  document.getElementById('res-emoji').textContent = emojis;
+  document.getElementById('res-title').textContent = titles;
+  document.getElementById('res-score').textContent = `${toArabicNum(score)}/${toArabicNum(total)}`;
+  document.getElementById('res-msg').textContent = msgs;
+  document.getElementById('rb-correct').textContent = toArabicNum(score);
+  document.getElementById('rb-wrong').textContent = toArabicNum(total-score);
+  document.getElementById('rb-pct').textContent = toArabicNum(pct)+'٪';
+  document.getElementById('q-bar').style.width = '100%';
+  showScreen('screen-result');
+}
+
+renderHome();
+document.getElementById('btn-start').disabled = false;
+</script>
